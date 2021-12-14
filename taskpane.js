@@ -6,6 +6,7 @@
 /* global console, document, Excel, Office */
 
 Office.onReady((info) => {
+  console.log("at on ready")
   if (info.host === Office.HostType.Excel) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
