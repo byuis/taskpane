@@ -7,6 +7,20 @@
 
 console.log("starting--------------------------")
 
+function init(){
+  
+  Office.onReady((info) => {
+    console.log("at on ready2")
+    if (info.host === Office.HostType.Excel) {
+      document.getElementById("sideload-msg").style.display = "none";
+      document.getElementById("app-body").style.display = "flex";
+      document.getElementById("run").onclick = run;
+    }
+  });
+
+}
+
+
 Office.onReady((info) => {
   console.log("at on ready")
   if (info.host === Office.HostType.Excel) {
