@@ -5,6 +5,8 @@
 
 /* global console, document, Excel, Office */
 
+console.log("starting--------------------------")
+
 Office.onReady((info) => {
   console.log("at on ready")
   if (info.host === Office.HostType.Excel) {
