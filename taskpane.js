@@ -4,7 +4,8 @@ console.log("starting--------------------------")
 
 async function test(excel) {
   try {
-      const range = context.workbook.getSelectedRange();
+    
+      const range = excel.workbook.getSelectedRange();
       range.load("address");
       range.format.fill.color = "yellow";
       await excel.sync();
