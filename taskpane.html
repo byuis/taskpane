@@ -14,15 +14,30 @@
 
     <!-- Template styles -->
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
+
     <script type="text/javascript" src="taskpane.js"></script>
-    
+    <script>
+
+function init(){
+  
+  Office.onReady((info) => {
+    console.log("at on ready2")
+    if (info.host === Office.HostType.Excel) {
+      document.getElementById("sideload-msg").style.display = "none";
+      document.getElementById("app-body").style.display = "flex";
+      document.getElementById("run").onclick = run;
+    }
+  });
+
+}
+    </script>
 
 </head>
 
 <body class="ms-font-m ms-welcome ms-Fabric" onload="init()">
     
     <header class="ms-welcome__header ms-bgColor-neutralLighter">
-        <img width="90" height="90" src="../../assets/logo-filled.png" alt="Contoso" title="Contoso" />
+        <img width="90" height="90" src="assets/logo-filled.png" alt="Contoso" title="Contoso" />
         <h1 class="ms-font-su">Welcome</h1>
     </header>
     <section id="sideload-msg" class="ms-welcome__main">
