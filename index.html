@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Script Foundry</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    
+    <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
+    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.1/css/fabric.min.css"/>
+
+    <!-- Template styles -->
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="excel.js"></script>
+    <script>
+        Office.onReady((info) => {
+        if (info.host === Office.HostType.Excel) {
+            document.getElementById("sideload-msg").style.display = "none";
+            document.getElementById("app-body").style.display = "flex";
+            Excel.run(async (excel)=>{
+              const settings = excel.workbook.settings;
+              code_part_id = settings.getItemOrNullObject("CodeXmlPartId").load("value");
+              await excel.sync()
+              console.log("code_part_id",code_part_id.isNullObject)
+              if(code_part_id.isNullObject){
+                  // need to make a place to hold the code for this workbook
+                //const originalXml = "<code xmlns='http://code.gove.net/code/1.0'><code></code>";
+                const customXmlPart = excel.workbook.customXmlParts.add("<Modules xmlns='http://schemas.gove.net/code/1.0'><Module>YXN5bmMgZnVuY3Rpb24gdGVzdChleGNlbCkgewogICAgICAgIGNvbnN0IHJhbmdlID0gZXhjZWwud29ya2Jvb2suZ2V0U2VsZWN0ZWRSYW5nZSgpOwogICAgICAgIHJhbmdlLmxvYWQoImFkZHJlc3MiKTsKICAgICAgICBhd2FpdCBleGNlbC5zeW5jKCk7CiAgICAgICAgY29uc29sZS5sb2coYFRoZSByYW5nZSBhZGRyZXNzIHdhcyAke3JhbmdlLmFkZHJlc3N9LmApOwogIH0=</Module></Modules>");
+                customXmlPart.load("id");
+                await excel.sync();
+                settings.add("CodeXmlPartId", customXmlPart.id);
+                console.log(("CodeXmlPartId", customXmlPart.id))
+                code_part_id =customXmlPart.id
+                console.log("code_part_id",code_part_id)
+                await excel.sync();
+              }else{
+                  code_part_id = code_part_id.m_value
+              }
+
+            })
+
+        }
+        });
+    </script>
+
+</head>
+
+<body onload="start_me_up()">
+  <div id="panel1">
+    <header class="welcome-header">
+        <div id="frame">
+        <img width="90" height="90" src="assets/logo-filled.png" alt="ACE" title="ACE" />
+        </div>
+        <h1>Atlas Code Environment</h1>
+    </header>
+    <section id="sideload-msg" class="welcome-main">
+        <h2>Please sideload your add-in to see app body.</h2>
+    </section>
+    <main id="app-body" class="welcome-main" style="display: none;">
+        <h2>Store Javascript automations in your workbook.</h2>
+        <ul class="List welcome-features">
+            <li class="ListItem"  onclick="show_panel(2)">
+                <i class="ms-Icon ms-Icon--Album"></i>
+                Show Examples
+            </li>
+            <li class="ListItem" onclick="show_panel(3)">
+                <i class="ms-Icon ms-Icon--CommandPrompt ms-font-xl"></i>
+                Open Editor
+            </li>
+            <li class="ListItem">
+                <i class="ms-Icon ms-Icon--CheckList ms-font-xl"></i>
+                List Automations
+            </li>
+            <li class="ListItem">
+                <i class="ms-Icon ms-Icon--Lifesaver ms-font-xl"></i>
+                View Documentation
+            </li>
+        </ul>
+        <p class="ms-font-l">Modify the source files, then click <b>Run</b>.</p>
+        <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl" onclick="Excel.run(test)">
+            <span class="ms-Button-label">Walk</span>
+        </div>
+    </main>
+  </div>
+  <div id="panel2" style="display:none;"></div>  
+  <div id="panel3" style="display:none;"></div>  
+</body>
+
+</html>

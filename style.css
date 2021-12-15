@@ -1,0 +1,189 @@
+/* 
+ * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * See LICENSE in the project root for license information.
+ */
+
+ html,
+ body {
+     width: 100%;
+     height: 100%;
+     margin: 0;
+     padding: 0 ;
+     background-color:rgb(252,239,205);
+     font-size: 1.2rem;
+     font-family: "Segoe UI Web (West European)",Segoe UI,-apple-system,BlinkMacSystemFont,Roboto,Helvetica Neue,sans-serif;
+ }
+ 
+ ul {
+     margin: 0;
+     padding: 0;
+ }
+ h1{
+    font-size: 2.5rem;
+    font-weight: 100;
+}
+ h2{
+     font-size: 1.7rem;
+     font-weight: 100;
+}
+
+ #frame{
+     display:inline-block;
+     padding: 1rem;
+     border-radius: 50%;
+     background-color: white;
+ }
+ 
+ .welcome-header {
+    padding: 20px;
+    padding-bottom: 30px;
+    padding-top: 60px;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: #36486b;
+    color:white;
+ }
+
+ .welcome-main {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-flex: 1 0 0;
+    flex: 1 0 0;
+    padding: 10px 20px;
+ }
+ 
+ .ms-welcome__main > h2 {
+     width: 100%;
+     text-align: center;
+ }
+ 
+ .welcome-features {
+     list-style-type: none;
+     margin-top: 20px;
+ }
+ 
+ .welcome-features.List .ListItem {
+     padding-bottom: 20px;
+     display: -webkit-flex;
+     display: flex;
+     cursor: pointer;
+ }
+ 
+ .welcome-features.List .ListItem > .ms-Icon {
+     margin-right: 1rem;
+     position: relative;
+     top: 5px;
+ }
+ 
+ .ms-welcome__action.ms-Button--hero {
+     margin-top: 30px;
+ }
+ 
+.ms-Button.ms-Button--hero .ms-Button-label {
+  color: #0078d7;
+}
+
+.ms-Button.ms-Button--hero:hover .ms-Button-label,
+.ms-Button.ms-Button--hero:focus .ms-Button-label{
+  color: #005a9e;
+  cursor: pointer;
+}
+
+b {
+    font-weight: bold;
+}
+.panel-head{
+    font-size: 1.5rem; 
+    color:white; 
+    background-color:#36486b; 
+    font-weight: 100; 
+    padding-left: 1rem;
+    padding-bottom: .35rem;
+}
+
+
+
+.link{ cursor: pointer;   padding: .1rem; }
+#content{  margin-left:1rem;}
+#status{  margin-left:1rem;}
+h2{color:#800000}
+a:hover {
+  text-decoration: underline;
+}
+
+.ace_editor { 
+      position:absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      
+  }   
+
+  .content{
+    padding: 0 .5rem 0 .5rem
+}
+.editor-content{
+    padding: 0
+}
+.panel-selector{
+      width:100%;
+      margin:0;
+      background-color: #36486b;
+      color:white;
+      font-weight: 100;
+      padding:0 0 0 1.5rem;
+      font-size: 1.2rem;
+
+  }
+
+  /* CSS */
+.button-14 {
+    background-image: linear-gradient(#f7f8fa ,#e7e9ec);
+    border-color: #adb1b8 #a2a6ac #8d9096;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 3px;
+    box-shadow: rgba(255,255,255,.6) 0 1px 0 inset;
+    box-sizing: border-box;
+    color: #0f1111;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Amazon Ember",Arial,sans-serif;
+    font-size: 14px;
+    height: 25px;
+    font-size: 13px;
+    outline: 0;
+    overflow: hidden;
+    padding: 0 11px;
+    text-align: center;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  
+
+  
+  .button-14:hover {
+    border-color: #a2a6ac #979aa1 #82858a;
+  }
+  
+
+
+
+
+
