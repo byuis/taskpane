@@ -4,8 +4,8 @@
   <Version>1.0.0.0</Version>
   <ProviderName>Gove Allen</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Script Foundry"/>
-  <Description DefaultValue="Build js scripts into you workbook."/>
+  <DisplayName DefaultValue="Atlas Code Environment"/>
+  <Description DefaultValue="Store Javascript automations in your workbook."/>
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
     <AppDomain>https://www.contoso.com</AppDomain>
@@ -14,7 +14,7 @@
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/taskpane.html"/>
+    <SourceLocation DefaultValue="https://byuis.github.io/taskpane/index.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -60,23 +60,23 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/assets/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/assets/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/assets/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://byuis.github.io/taskpane/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://byuis.github.io/taskpane/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://byuis.github.io/taskpane/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/taskpane.html"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://byuis.github.io/taskpane/commands.html"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://byuis.github.io/taskpane/index.html"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="Get started with your sample add-in!"/>
-        <bt:String id="CommandsGroup.Label" DefaultValue="Commands Group"/>
-        <bt:String id="TaskpaneButton.Label" DefaultValue="Show Taskpane"/>
+        <bt:String id="GetStarted.Title" DefaultValue="Get started automating your workflow!"/>
+        <bt:String id="CommandsGroup.Label" DefaultValue="Atlas"/>
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Code Environment"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Your sample add-in loaded succesfully. Go to the HOME tab and click the 'Show Taskpane' button to get started."/>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show a Taskpane"/>
+        <bt:String id="GetStarted.Description" DefaultValue="The Atlas Code Environment add-in loaded succesfully. Go to the HOME tab and click the 'Code Environment' button to get started."/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show Code Environment"/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

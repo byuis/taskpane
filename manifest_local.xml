@@ -70,12 +70,12 @@
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3333/ee-atlas/s/taskpane/index.html"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="Get started with your sample add-in!"/>
-        <bt:String id="CommandsGroup.Label" DefaultValue="Automation"/>
+        <bt:String id="GetStarted.Title" DefaultValue="Get started automating your workflow!"/>
+        <bt:String id="CommandsGroup.Label" DefaultValue="Atlas"/>
         <bt:String id="TaskpaneButton.Label" DefaultValue="Code Environment"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="The Automation Editor add-in loaded succesfully. Go to the HOME tab and click the 'Code Environment' button to get started."/>
+        <bt:String id="GetStarted.Description" DefaultValue="The Atlas Code Environment add-in loaded succesfully. Go to the HOME tab and click the 'Code Environment' button to get started."/>
         <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show Code Environment"/>
       </bt:LongStrings>
     </Resources>
