@@ -1,6 +1,7 @@
 let code_part_id // the id of the cusomxml part that holds the code
 let css_suffix="" // set by the user with set_css()
 const panels=['panel_introduction','panel_examples','panel_code_editor']
+const panel_stack=['panel_introduction']
 const styles={
   system:null,
   none:"/*No Theme CSS Used*/",
@@ -19,8 +20,7 @@ const styles={
 
 
 function start_me_up(){
- styles.system=document.getElementById("head_style").innerText
- console.log(styles)
+  styles.system=document.getElementById("head_style").innerText
   
   panels.push("panel_introduction")
   // fit the editor to the windows on resize
@@ -33,6 +33,9 @@ function start_me_up(){
   build_panel("panel_code_editor")
   init_editor()
   init_examples()
+  //done opening, see what is active panel in case auto_exec opened something
+
+  
 }
 
 async function get_style(style_name, url, integrate_now){
@@ -123,11 +126,14 @@ function show_automations(){
   if(!panels.includes){
     build_panel(panel_name)
   }
-  // get the list of functions
-  const code=ace.edit("editor-content").getValue()
-  const functions=get_function_names(code).function
   
-  const html=["<h2>Automations built into this workbook.</h2><ol>"]
+
+  // get the list of functions
+  const code=tag("editor_script_div").firstChild.innerText
+  const functions=get_function_names(code).function
+  console.log("tag(panel_name)",tag(panel_name))
+
+  const html=['<div onclick="close_canvas(\'panel_automations\')" class="top-corner" style="border: 1px solid black; padding:5px 5px 0 5px;margin:5px 15px 0 0; cursor:pointer"><i class="ms-Icon ms-Icon--ChromeClose"></i></div><h2 style="margin:0 0 0 1rem">Automations built into this workbook.</h2><ol>']
 
   for(const func of functions){
     let func_value = null
@@ -151,7 +157,7 @@ function show_automations(){
           stmt=func_value
         }
 
-        html.push('<li onclick="'+stmt+'"><b>'+comment_json.name+'</b>: '+comment_json.description+'</li>')
+        html.push('<li onclick="'+stmt+'" style="cursor:pointer"><b>'+comment_json.name+'</b>: '+comment_json.description+'</li>')
        //console.log("html",html)
      }catch(e){
       //console.log("ace.listing was not valid JSON", comment)        
@@ -165,7 +171,6 @@ function show_automations(){
   }else{
     html.push("</ul>")  
   }
-  html.push('<br><button onclick="close_canvas(\'panel_automations\')">Exit</button>')
   open_canvas("panel_listings",html.join(""))
   
 }
@@ -174,6 +179,13 @@ function show_panel(panel_name){
   if(panels.slice(0, 3).includes(panel_name)){
     set_style()
   }
+
+ // need to see what is open to pop it form the list 
+//  for(const panel of panels){
+//     if(tag(panel).style.display==='block'){
+//       panel_stack.pop()
+//     }
+//  }
   
  //console.log("trying",panel_name)
   for(const panel of panels){
@@ -183,8 +195,9 @@ function show_panel(panel_name){
         tag("selector_"+ panel_name).value=panel_name
       }
       tag(panel).style.display="block"  
+      panel_stack.push(panel)
     }else{
-     //console.log("hiding", panel)
+      console.log(" hiding", panel)
       tag(panel).style.display="none"  
     }
   }
@@ -290,7 +303,7 @@ function init_editor(){
        //console.log("in try")
         auto_exec()
       }catch(e){
-       //console.log("catch",e)
+       ;console.log("catch",e)
       }  
 
 
@@ -319,7 +332,7 @@ function init_examples(){
   div.id="e_content"
   panel.appendChild(div)
 
-console.log("about to fetch")
+//console.log("about to fetch")
 
 fetch("https://thegove.github.io/VBA-samples/excel-js_snippets.yaml?" + new Date())
 .then((response) => response.text())

@@ -29,7 +29,7 @@
               if(code_part_id.isNullObject){
                   // need to make a place to hold the code for this workbook
                 //const originalXml = "<code xmlns='http://code.gove.net/code/1.0'><code></code>";
-                const customXmlPart = excel.workbook.customXmlParts.add("<Modules xmlns='http://schemas.gove.net/code/1.0'><Module>YXN5bmMgZnVuY3Rpb24gdGVzdChleGNlbCkgewogICAgICAgIGNvbnN0IHJhbmdlID0gZXhjZWwud29ya2Jvb2suZ2V0U2VsZWN0ZWRSYW5nZSgpOwogICAgICAgIHJhbmdlLmxvYWQoImFkZHJlc3MiKTsKICAgICAgICBhd2FpdCBleGNlbC5zeW5jKCk7CiAgICAgICAgY29uc29sZS5sb2coYFRoZSByYW5nZSBhZGRyZXNzIHdhcyAke3JhbmdlLmFkZHJlc3N9LmApOwogIH0=</Module></Modules>");
+                const customXmlPart = excel.workbook.customXmlParts.add("<Modules xmlns='http://schemas.gove.net/code/1.0'><Module>YXN5bmMgZnVuY3Rpb24gcmVjb3JkX3RpbWUoZXhjZWwpIHsKICAvKmFjZS5saXN0aW5nOiB7Im5hbWUiOiJSZWNvcmQgVGltZSIsImRlc2NyaXB0aW9uIjoiVXBkYXRlcyB0aGUgc2VsZWN0ZWQgY2VsbHMgd2l0aCB0aGUgY3VycmVudCB0aW1lIGZyb20gdGhlIHN5c3RlbSBjbG9jay4ifSovCiAgY29uc3QgcmFuZ2UgPSBleGNlbC53b3JrYm9vay5nZXRTZWxlY3RlZFJhbmdlKCk7CiAgcmFuZ2UudmFsdWVzPW5ldyBEYXRlKCk7CiAgYXdhaXQgZXhjZWwuc3luYygpOwp9</Module></Modules>");
                 customXmlPart.load("id");
                 await excel.sync();
                 settings.add("CodeXmlPartId", customXmlPart.id);
@@ -223,8 +223,12 @@
                 vertical-align: middle;
             }
             
+            .top-corner{
+                position:absolute;
+                top:0;
+                right:0;
+            }            
 
-            
             .button-14:hover {
                 border-color: #a2a6ac #979aa1 #82858a;
             }
@@ -246,13 +250,13 @@
     <main id="app-body" class="welcome-main" style="display: none;">
         <h2>Store Javascript automations in your workbook.</h2>
         <ul class="List welcome-features">
-            <li class="ListItem"  onclick="show_examples()">
-                <i class="ms-Icon ms-Icon--Album"></i>
-                Show Examples
-            </li>
             <li class="ListItem" onclick="show_panel('panel_code_editor')">
                 <i class="ms-Icon ms-Icon--CommandPrompt ms-font-xl"></i>
                 Open Code Editor
+            </li>
+            <li class="ListItem"  onclick="show_examples()">
+                <i class="ms-Icon ms-Icon--Album"></i>
+                Show Examples
             </li>
             <li class="ListItem" onclick="show_automations()">
                 <i class="ms-Icon ms-Icon--CheckList ms-font-xl"></i>

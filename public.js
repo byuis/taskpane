@@ -24,11 +24,16 @@ function tag(id){
 }
 
 function close_canvas(){
-    show_panel("panel_introduction")
+    panel_stack.pop()
+    show_panel(panel_stack.pop())
 }
 
 function open_editor(){
     show_panel("panel_code_editor")
+}
+
+function open_automations(){
+    show_automations()
 }
 
 function reset(){
