@@ -2,10 +2,30 @@
 const global={}
 const default_style_name="marx"
 
+async function load_from_gist(gist_url){
+    //takes a gist URL and loads it's content in a script window
+    const code=await get_code_from_gist(gist_url)
+    console.log(code)
+    const script = document.createElement("script")
+    script.innerHTML = code
+    script.id="gist-import-script"
+    document.body.appendChild(script)
+    tag("gist-import-script").remove()
+  
+}
+
+
 function set_css(user_css){
     css_suffix=user_css
 }
 
+function add_library(url){
+    // adds a JS library to the head section of the HTML sheet
+    const library = document.createElement('script');
+    library.setAttribute('src',url);
+    console.log("library",library)
+    document.head.appendChild(library);
+}
 
 function set_theme(theme_name){
     set_style(theme_name)
@@ -29,7 +49,7 @@ function close_canvas(){
 }
 
 function open_editor(){
-    show_panel("panel_code_editor")
+    show_panel(code_panels[0])
 }
 
 function open_automations(){
@@ -64,3 +84,9 @@ function open_canvas(panel, proc_or_html, style_name){
     }
 }
   
+function show_examples(){
+    const panel_name="panel_examples"
+    set_style()
+    show_panel(panel_name)
+  
+  }
