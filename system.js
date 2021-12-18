@@ -52,8 +52,8 @@ function start_me_up(){
   window.addEventListener('resize', function(event) {
     console.log("hi")
     for(const panel_name of code_panels){
-`      tag(panel_name + "_editor-page").style.height = editor_height()
-`    }
+      tag(panel_name + "_editor-page").style.height = editor_height()
+    }
   }, true);
   init_examples()
   
@@ -95,7 +95,7 @@ function add_code_module(name,code){
   }
   if(!name){name="code"}
   add_code_editor(name, code, "")
-  tag("add-module").style.display="none"
+  hide_element("add-module")
   show_element("open-editor")
   show_panel(code_panels[code_panels.length-1])
   write_module_to_workbook(code,code_panels[code_panels.length-1])
@@ -162,7 +162,7 @@ async function get_style(style_name, url, integrate_now){
 
 function set_style(style_name){
 
-  console.log("at set style", style_name)
+  //console.log("at set style", style_name)
   let css_sfx = css_suffix
   if(!style_name){
     style_name="system"
@@ -340,7 +340,6 @@ function toggle_wrap(panel_name){
 function add_code_editor(module_name, code, module_xmlid, settings, options){
   // settings are things gove is storing with the module
   // options are the options from the ace editor
-
   if(!options){// default options for the editor
     options={
       fontSize: "14pt",
@@ -348,8 +347,12 @@ function add_code_editor(module_name, code, module_xmlid, settings, options){
       wrap: global_wrap
     }
   }
+console.log(module_name, "options", options)
+  if(!settings){
+    settings={cursorPosition:{row: 0, column: 0}}
+  }
   
-  console.log("adding ace editor", module_name, module_xmlid)
+  //console.log("adding ace editor", module_name, module_xmlid)
   const panel_name = "panel_" + module_name.toLowerCase().split(" ").join("_") + "_module"
   code_panels.push(panel_name)
   panel_labels.push(panel_name_to_panel_label(panel_name))
@@ -422,8 +425,14 @@ function add_code_editor(module_name, code, module_xmlid, settings, options){
       window.event.target.parentElement.dataset.edited=true
     });
     editor.setTheme("ace/theme/solarized_light");
+    if(!isNaN(options.fontSize)){
+      options.fontSize += "pt"
+    }
     editor.setOptions(options);
     editor.session.setMode("ace/mode/javascript");
+
+    console.log("settings", settings)
+    editor.moveCursorTo(settings.cursorPosition.row, settings.cursorPosition.column)
 
     editor.commands.addCommand({  // toggle word wrap
       name: "wrap",
@@ -513,8 +522,9 @@ function add_code_editor(module_name, code, module_xmlid, settings, options){
   tag(panel_name).appendChild(editor_container)
 
   load_function_names_select(code, panel_name)
-  if(settings){
+  if(settings.func){
     tag(panel_name + "_function-names").value=settings.func
+
   }
 
   // AutoExecutable function
@@ -709,17 +719,24 @@ function write_module_to_workbook(code, panel_name){
   // save to workbook
   Excel.run(async (excel)=>{
     //console.log("saving code", panel_name) 
-    let options = {theme:global_theme,wrap:global_wrap}
-
-    try{
-      options=ace.edit(panel_name + "-content").getOptions()
-    }catch(e){
-      console.log("expected error:",e)
+    let options = {theme:global_theme,wrap:global_wrap,fontSize:"14pt"}
+    const settings = {
+      func:tag(panel_name + "_function-names").value,
+      cursorPosition:{row: 0, column: 0}
     }
+    try{
+      const editor = ace.edit(panel_name + "-content") 
+      settings.cursorPosition = editor.getCursorPosition()
+      options=editor.getOptions()
+    }catch(e){
+      console.log("This is an expected error: ace editor not yet built",e)
+    }
+
+    console.log("writing options", options)
     
     const name = tag(panel_name).dataset.module_name
     const xmlid = tag(panel_name).dataset.module_xmlid
-    const settings = {func:tag(panel_name + "_function-names").value}
+    
     const module_xml = "<module xmlns='http://schemas.gove.net/code/1.0'><name>"+name+"</name><settings>"+btoa(JSON.stringify(settings))+"</settings><options>"+btoa(JSON.stringify(options))+"</options><code>"+btoa(code)+"</code></module>"
     if(xmlid){
       console.log("updating xml", xmlid)
@@ -889,9 +906,17 @@ function show_element(tag_id){
 
 function hide_element(tag_id){
   // adds the hidden class from a tag's css
-  if(!tag(tag_id).className.includes("hidden")){
-    tag(tag_id).className=(tag(tag_id).className + " hidden").trim()
+  console.log("tag_id",tag_id)
+  console.log("tag(tag_id)",tag(tag_id))
+  console.log("tag(tag_id).className",tag(tag_id).className)
+  if(tag(tag_id).className){
+    if(!tag(tag_id).className.includes("hidden")){
+      tag(tag_id).className=(tag(tag_id).className + " hidden").trim()
+    }
+  }else{
+    tag(tag_id).className="hidden"
   }
+  
 }
 
 function toggle_element(tag_id){
