@@ -157,8 +157,7 @@ body{
           <td class="ace-clickable" onclick="toggle_element('add-module');tag('new-module-name').focus()">Add a Code Module</td>
         </tr>
         <tr id="add-module" class="hidden">
-          <td></td>
-          <td> <input id="new-module-name" size="10" placeholder="Module Name"/>
+          <td colspan=2><input id="new-module-name" style="width:11rem" placeholder="Module Name"/>
             <button id="module-add-button" onclick="add_code_module(tag('new-module-name').value)">Add</button></td>
         </tr>
 
@@ -167,8 +166,7 @@ body{
           <td class="ace-clickable" onclick="toggle_element('import-module');tag('gist-url').focus()">Import a Code Module</td>
         </tr>
         <tr id="import-module" class="hidden">
-          <td></td>
-          <td> <input id="gist-url" size="10" placeholder="Gist Url"/>
+          <td colspan=2> <input id="gist-url" style="width:10.5rem"  placeholder="Gist Url"/>
             <button id="module-import-button" onclick="import_code_module(tag('gist-url').value)">Import</button></td>
         </tr>
 
@@ -189,9 +187,35 @@ body{
 
         <tr>
           <td><i class="far fa-comment-alt"></i></td>
-          <td class="ace-clickable">Send Feedback</td>
+          <td class="ace-clickable" onclick="toggle_element('survey');tag('fb-type').focus();tag('fb-message').scrollIntoView(true);">Send Feedback</td>
         </tr>
-      </table>
+        <tr id="survey" class="hidden">
+          <td colspan=2 style="text-align:center"> 
+              <select id="fb-type" style="width:15.4rem">
+                  <option value="" disabled selected hidden>Type of feedback...</option>
+                  <option value="feature">Request a feature</option>
+                  <option value="report">Report a problem</option>
+                  <option value="praise">Praise for this addin</option>
+                  <option value="question">Ask a question</option>
+                </select><br />
+                <select id="fb-platform" style="width:15.4rem">
+                    <option value="" disabled selected hidden>MS Office Platform...</option>
+                    <option value="All">All</option>
+                    <option value="Mac">Mac</option>
+                    <option value="Windows">Windows</option>
+                    <option value="Online">Online</option>
+                    <option value="iPad">iPda</option>
+                    <option value="Android">Android</option>
+                    <option value="Other">Other</option>
+                </select><br />
+                <input id="fb-email" style="width:15rem" placeholder="Your email address (optional)"/><br />
+                <textarea id="fb-text" style="height:5rem;width:15rem;margin-top: 5px;" placeholder="The text of your feedback..."></textarea><br />
+                <button id="fb-button" onclick="submit_feedback()">Submit</button>
+                </div><div id="fb-message" style="width:15rem;color:red;text-align:left"></div>
+          </td>
+        </tr>
+  
+    </table>
     <section id="sideload-msg"  style="display:none">
         <h2 class="ace-heading-2">This addin must be run from inside Excel.</h2>
     </section>

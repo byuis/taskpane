@@ -47,7 +47,6 @@ function start_me_up(){
   });
 
 
-
   // fit the editor to the windows on resize
   window.addEventListener('resize', function(event) {
     console.log("hi")
@@ -83,6 +82,74 @@ function start_me_up(){
   })
 }
 
+async function submit_feedback(){
+  // send feedback to the google form
+  const message=[]
+  if(tag("fb-type").value===""){message.push("<li>You must indicate the <b>type</b> of your feedback.</li>")}
+  if(tag("fb-text").value===""){message.push("<li>You must provide the <b>text</b> of your feedback.</li>")}
+  if(tag("fb-platform").value===""){message.push("<li>You must provide the <b>platform</b> you are using.</li>")}
+  if(message.length===0){
+    // ready to submit
+    const form_data=[]
+    form_data.push("?entry.1033992853=")
+    form_data.push(encodeURIComponent(tag("fb-type").value))
+    form_data.push("&entry.482647522=")
+    form_data.push(encodeURIComponent(tag("fb-platform").value))
+    form_data.push("&entry.1230850697=")
+    form_data.push(encodeURIComponent(tag("fb-email").value))
+    form_data.push("&entry.1009690762=")
+    form_data.push(encodeURIComponent(tag("fb-text").value))
+
+    tag("fb-message").innerHTML=""
+    
+    const options = {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form_data.join("")
+    };
+    console.log("form data",form_data)
+    try{
+    const response = await fetch("https://docs.google.com/forms/u/0/d/e/1FAIpQLSdVKirGpjhiBnsFuzzYH4xNvUj2i0r1fwemFgtC_9mmAcXUJA/formResponse", options)
+    console.log("reson",response.status)
+    const data = await response.text()
+    console.log("data",data)
+    tag("fb-message").style.color="green"
+    message.push("Thanks for your feedback. ")
+    switch(tag("fb-type").value){
+      case "feature":
+        message.push("Were not sure when we'll be updaing next but thanks for helping us understand your needs.")
+        break
+      case "report":
+        message.push("While we cannot respond to every problem report, we'll do what we can.")
+        break
+      case "praise":
+        message.push("We thrive on positive feedback.")
+        break
+      default:  
+        message.push("While we cannot respond to every question, we'll do what we can.")
+    }
+    tag("fb-message").innerHTML="Thanks for your feedback.  While we cannot respond to every question, we'll do what we can."
+    tag("fb-message").scrollIntoView(true);
+    setTimeout(function() {
+      hide_element('survey')
+      tag("fb-message").innerHTML=""
+    }, 10000);
+    }catch(e){
+      console.log("form error: ",e)
+      tag("fb-message").style.color="red"
+      tag("fb-message").innerHTML='Oops.  It looks as though there was a network error.  Your can tray again later or submit at our <a href="https://docs.google.com/forms/d/e/1FAIpQLSdVKirGpjhiBnsFuzzYH4xNvUj2i0r1fwemFgtC_9mmAcXUJA/viewform" target="_blank">Google Form<a>.'  
+      window.scrollTo(0,document.body.scrollHeight);
+      tag("fb-message").scrollIntoView(true);
+    }
+    
+  }else{
+    tag("fb-message").style.color="red"
+    tag("fb-message").innerHTML="<ul>" + message.join("") + "</ul>"
+    tag("fb-message").scrollIntoView(true);
+  }
+  
+}
 
 function add_code_module(name,code){
   // a module built with whatever code is in default_code
