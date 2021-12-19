@@ -11,8 +11,9 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
-    <script type="text/javascript" src="public.js"></script>
+    <script type="text/javascript" src="globals.js"></script>
     <script type="text/javascript" src="system.js"></script>
+    <script type="text/javascript" src="public.js"></script>
     <script>
         Office.onReady((info) => {
         if (info.host === Office.HostType.Excel) {
@@ -84,7 +85,7 @@ body{
 .ace-table{
         margin-left: auto;
         margin-right: auto;
-        border-spacing: 1rem;
+        border-spacing: .5rem;
 
 }
 .ace-clickable{
@@ -131,7 +132,15 @@ body{
 .hidden{
     display:none
 }
+.fas, .far {
+  color: #800000;
+}
+.ace-form{
+    text-align: left;
+    font-size: 1rem;
+    width:15rem;
 
+}
 
 </style>
 
@@ -147,56 +156,57 @@ body{
     <div class="ace-body"> 
     <h2  class="ace-heading-2">Store Javascript automations in your workbook.</h2>
       <table id="menu" class="ace-table">
-        <tr id="open-editor" class="hidden">
+        <tr class="ace-clickable hidden" onclick="open_editor()" id="open-editor">
             <td><i class="fas fa-laptop-code"></i></td>
-            <td class="ace-clickable" onclick="open_editor()">Open Code Editor</td>
+            <td>Open Code Editor</td>
         </tr>
 
-        <tr>
+        <tr class="ace-clickable" onclick="toggle_element('add-module');tag('new-module-name').focus()"">
           <td><i class="far fa-window-maximize"></i></td>
-          <td class="ace-clickable" onclick="toggle_element('add-module');tag('new-module-name').focus()">Add a Code Module</td>
+          <td>Add a Code Module</td>
         </tr>
         <tr id="add-module" class="hidden">
           <td colspan=2><input id="new-module-name" style="width:11rem" placeholder="Module Name"/>
             <button id="module-add-button" onclick="add_code_module(tag('new-module-name').value)">Add</button></td>
         </tr>
 
-        <tr>
+        <tr class="ace-clickable" onclick="toggle_element('import-module');tag('gist-url').focus()">
             <td><i class="fas fa-file-import"></i></td>
-          <td class="ace-clickable" onclick="toggle_element('import-module');tag('gist-url').focus()">Import a Code Module</td>
+          <td>Import a Code Module</td>
         </tr>
         <tr id="import-module" class="hidden">
           <td colspan=2> <input id="gist-url" style="width:10.5rem"  placeholder="Gist Url"/>
             <button id="module-import-button" onclick="import_code_module(tag('gist-url').value)">Import</button></td>
         </tr>
 
-        <tr>
+        <tr class="ace-clickable" onclick="show_examples()">
           <td><i class="fas fa-graduation-cap"></i></td>
-          <td class="ace-clickable" onclick="show_examples()">Show Examples</td>
+          <td>Show Examples</td>
         </tr>
 
-        <tr>
+        <tr class="ace-clickable" onclick="show_automations()">
           <td><i class="fas fa-list-ol"></i></td>
-          <td class="ace-clickable" onclick="show_automations()">List Automations</td>
+          <td>List Automations</td>
         </tr>
 
-        <tr>
+        <tr class="ace-clickable">
           <td><i class="fas fa-book"></i></td>
-          <td class="ace-clickable">View Documentation</td>
+          <td>View Documentation</td>
         </tr>
 
-        <tr>
+        <tr class="ace-clickable" onclick="toggle_element('survey');tag('fb-type').focus();tag('fb-message').scrollIntoView(true);">
           <td><i class="far fa-comment-alt"></i></td>
-          <td class="ace-clickable" onclick="toggle_element('survey');tag('fb-type').focus();tag('fb-message').scrollIntoView(true);">Send Feedback</td>
+          <td>Send Feedback</td>
         </tr>
         <tr id="survey" class="hidden">
           <td colspan=2 style="text-align:center"> 
               <select id="fb-type" style="width:15.4rem">
                   <option value="" disabled selected hidden>Type of feedback...</option>
-                  <option value="feature">Request a feature</option>
-                  <option value="report">Report a problem</option>
-                  <option value="praise">Praise for this addin</option>
-                  <option value="question">Ask a question</option>
+                  <option value="Feature Resuest">Request a feature</option>
+                  <option value="Report Issue">Report a problem</option>
+                  <option value="Praise for Addin">Praise for this add-in</option>
+                  <option value="Offer to help with development">Offer to help with development</option>
+                  <option value="Question">Ask a question</option>
                 </select><br />
                 <select id="fb-platform" style="width:15.4rem">
                     <option value="" disabled selected hidden>MS Office Platform...</option>
@@ -214,7 +224,82 @@ body{
                 </div><div id="fb-message" style="width:15rem;color:red;text-align:left"></div>
           </td>
         </tr>
+
+        <tr class="ace-clickable" onclick="configure_settings()">
+            <td><i class="fas fa-cog"></i></td>
+            <td>Settings</td>
+          </tr>
+          <tr id="settings" class="hidden">
+            <td colspan=2 style="text-align:center" class="ace-form"> 
+                <div class="ace-form">Editor Theme</div>
+                <select id="ace-theme" style="width:15.4rem">
+                    <option value="ambiance">Ambiance</option>
+                    <option value="chaos">Chaos</option>
+                    <option value="chrome">Chrome</option>
+                    <option value="clouds">Clouds</option>
+                    <option value="clouds_midnight">Clouds Midnight</option>
+                    <option value="cobalt">Cobalt</option>
+                    <option value="crimson_editor">Crimson Editor</option>
+                    <option value="dawn">Dawn</option>
+                    <option value="dracula">Dracula</option>
+                    <option value="dreamweaver">Dreamweaver</option>
+                    <option value="eclipse">Eclipse</option>
+                    <option value="github">Github</option>
+                    <option value="gob">Gob</option>
+                    <option value="gruvbox">Gruvbox</option>
+                    <option value="idle_fingers">Idle Fingers</option>
+                    <option value="iplastic">Iplastic</option>
+                    <option value="katzenmilch">Katzenmilch</option>
+                    <option value="kr_theme">Kr Theme</option>
+                    <option value="kuroir">Kuroir</option>
+                    <option value="merbivore">Merbivore</option>
+                    <option value="merbivore_soft">Merbivore Soft</option>
+                    <option value="mono_industrial">Mono Industrial</option>
+                    <option value="monokai">Monokai</option>
+                    <option value="nord_dark">Nord Dark</option>
+                    <option value="one_dark">One Dark</option>
+                    <option value="pastel_on_dark">Pastel On Dark</option>
+                    <option value="solarized_dark">Solarized Dark</option>
+                    <option value="solarized_light" selected>Solarized Light</option>
+                    <option value="sqlserver">Sqlserver</option>
+                    <option value="terminal">Terminal</option>
+                    <option value="textmate">Textmate</option>
+                    <option value="tomorrow">Tomorrow</option>
+                    <option value="tomorrow_night">Tomorrow Night</option>
+                    <option value="tomorrow_night_blue">Tomorrow Night Blue</option>
+                    <option value="tomorrow_night_bright">Tomorrow Night Bright</option>
+                    <option value="tomorrow_night_eighties">Tomorrow Night Eighties</option>
+                    <option value="twilight">Twilight</option>
+                    <option value="vibrant_ink">Vibrant Ink</option>
+                    <option value="xcode">Xcode</option>
+                </select><br />
+                <div class="ace-form" style="margin-top: .3rem;">Editor Word Wrap</div>
+                <select id="ace-word-wrap" style="width:15.4rem">
+                    <option value="no-wrap" selected>Do not wrap long lines</option>
+                    <option value="wrap">Wrap long lines</option>
+                    <option value="wrap-indented">Wrap and indent long lines</option>
+                </select><br />
+                <div class="ace-form"  style="margin-top: .3rem;">Editor Font Size</div>
+                <select id="ace-font-size" style="width:15.4rem">
+                    <option value="6">6pt</option>
+                    <option value="8">8pt</option>
+                    <option value="10">10pt</option>
+                    <option value="12">12pt</option>
+                    <option value="14" selected>14pt</option>
+                    <option value="18">18pt</option>
+                    <option value="20">20pt</option>
+                    <option value="24">24pt</option>
+                    <option value="36">36pt</option>
+                    <option value="48">48pt</option>
+                </select><br />
+                <div class="ace-form"  style="margin-top: .3rem;">Show Line Numbers <input id="ace-line-numbers" type="checkbox" value="true"/></div>
+                <br />
+                  <button id="settings-button" onclick="console.log(1),save_options()">Save</button>
+            </td>
+          </tr>
   
+        
+
     </table>
     <section id="sideload-msg"  style="display:none">
         <h2 class="ace-heading-2">This addin must be run from inside Excel.</h2>
