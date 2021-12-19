@@ -482,7 +482,7 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
   //   options=options_in
   // }
 
-console.log(module_name, "options", options)
+  //console.log(module_name, "options", options)
   if(!settings){
     settings={cursorPosition:{row: 0, column: 0}}
   }
@@ -615,7 +615,7 @@ console.log(module_name, "options", options)
     })
     editor.commands.addCommand({  // could do ctrl+r but want to be parallel with save
       name: "run",
-      bindKey: {win: "Ctrl-e", mac: "Command-e"},
+      bindKey: {win: "Ctrl-enter", mac: "Command-enter"},
       exec: function(editor) {
         for(const panel of code_panels){
           if(tag(panel).style.display==="block"){
@@ -629,7 +629,7 @@ console.log(module_name, "options", options)
 
     editor.commands.addCommand({  // could do ctrl+r but want to be parallel with save
       name: "run_shift",
-      bindKey: {win: "Ctrl-shift-e", mac: "Command-shift-e"},
+      bindKey: {win: "alt-enter", mac: "alt-enter"},
       exec: function(editor) {
         for(const panel of code_panels){
           if(tag(panel).style.display==="block"){
