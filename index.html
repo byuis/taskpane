@@ -8,7 +8,7 @@
 
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
     <script type="text/javascript" src="globals.js"></script>
@@ -141,6 +141,63 @@ body{
     width:15rem;
 
 }
+.ace-output{
+    margin:.5rem;
+ 
+}
+.ace-output-header{
+    background-color: darkslategrey;
+    color:white;
+    padding:.2rem .2rem .2rem 1rem;
+    font-weight: bold;
+}
+
+.ace-output-close{
+    float:right;
+    width:3rem;
+    text-align: right;
+}
+
+.ace-output-body{
+    background-color: white;
+    color:black;
+    padding: .5rem;
+}
+
+.ace-output-time{
+    color: limegreen;
+    margin-right: 1rem;
+}
+
+#ace-alert {
+    position: fixed;
+    top: 0;
+    border:2px solid black ;
+    z-index:99;
+    min-width: 200px;
+    max-width: 90%;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+.ace-alert-header{
+    background-color: royalBlue;
+    color:white;
+    padding:.2rem .2rem .2rem 1rem;
+    font-weight: bold;
+}
+
+.ace-alert-close{
+    float:right;
+    width:3rem;
+    text-align: right;
+}
+
+.ace-alert-body{
+    background-color: white;
+    color:black;
+    padding: .5rem;
+}
+
 
 </style>
 
@@ -231,7 +288,10 @@ body{
           </tr>
           <tr id="settings" class="hidden">
             <td colspan=2 style="text-align:center" class="ace-form"> 
-                <div class="ace-form">Editor Theme</div>
+                <div class="ace-form">Example List URL</div>
+                <input id="examples-url" style="width:15.4rem">
+
+                <div class="ace-form" style="margin-top: .3rem;">Editor Theme</div>
                 <select id="ace-theme" style="width:15.4rem">
                     <option value="ambiance">Ambiance</option>
                     <option value="chaos">Chaos</option>
@@ -294,7 +354,7 @@ body{
                 </select><br />
                 <div class="ace-form"  style="margin-top: .3rem;">Show Line Numbers <input id="ace-line-numbers" type="checkbox" value="true"/></div>
                 <br />
-                  <button id="settings-button" onclick="console.log(1),save_options()">Save</button>
+                  <button id="settings-button" onclick="console.log(1),save_settings()">Save</button>
             </td>
           </tr>
   

@@ -28,6 +28,7 @@ function start_me_up(){
     }
   }, true);
   init_examples()
+  init_output()
   
   // ---------------- Initializing Code Editors -----------------------------
   if(code_module_ids.length>0){// show the button to view code modules
@@ -43,7 +44,7 @@ function start_me_up(){
       //console.log("blob", xmlBlob)
       const doc = parser.parseFromString(xmlBlob.value, "application/xml");
       const module_name=doc.getElementsByTagName("name")[0].textContent
-      const module_code=atob(doc.getElementsByTagName("code")[0].textContent)
+      const module_code = atob(doc.getElementsByTagName("code")[0].textContent)
       const settings=atob(doc.getElementsByTagName("settings")[0].textContent)
       const options=atob(doc.getElementsByTagName("options")[0].textContent)
       //console.log("settings", settings)
@@ -86,47 +87,49 @@ function start_me_up(){
 function configure_settings(){
   toggle_element('settings');
   if(!tag('settings').className.includes("hidden")){
-    tag('ace-theme').focus();
+    //tag('ace-theme').focus();
     tag('settings-button').scrollIntoView(true);
-    //console.log("fontSize",global_ace_options.fontSize)  
-    tag("ace-font-size").value = global_ace_options.fontSize.replace("pt","")
-    if(global_ace_options.wrap===false){
+    //console.log("fontSize",global_settings.ace_options.fontSize)  
+    tag("ace-font-size").value = global_settings.ace_options.fontSize.replace("pt","")
+    if(global_settings.ace_options.wrap===false){
       tag("ace-word-wrap").value="no-wrap"
-    }else if(global_ace_options.indentedSoftWrap){
+    }else if(global_settings.ace_options.indentedSoftWrap){
       tag("ace-word-wrap").value="wrap-indented"
     }else{
       tag("ace-word-wrap").value="wrap"
     }
-    //console.log("theme", global_ace_options.theme)
-    //console.log("theme", global_ace_options.theme.split("/")[2])
-    tag("ace-theme").value  = global_ace_options.theme.split("/")[2]
-    tag("ace-line-numbers").checked = global_ace_options.showGutter
+    //console.log("theme", global_settings.ace_options.theme)
+    //console.log("theme", global_settings.ace_options.theme.split("/")[2])
+    tag("examples-url").value  = global_settings.system.examples_url
+    tag("ace-theme").value  = global_settings.ace_options.theme.split("/")[2]
+    tag("ace-line-numbers").checked = global_settings.ace_options.showGutter
   }
 }
 
 
-function save_options(){
-  global_ace_options.theme="ace/theme/" + tag("ace-theme").value
-  global_ace_options.fontSize=tag("ace-font-size").value + "pt"
-  global_ace_options.showGutter=tag("ace-line-numbers").checked
+function save_settings(){
+  global_settings.system.examples_url=tag("examples-url").value
+  global_settings.ace_options.theme="ace/theme/" + tag("ace-theme").value
+  global_settings.ace_options.fontSize=tag("ace-font-size").value + "pt"
+  global_settings.ace_options.showGutter=tag("ace-line-numbers").checked
   switch(tag("ace-word-wrap").value){
     case "wrap":
-      global_ace_options.wrap=true
-      global_ace_options.indentedSoftWrap=false
+      global_settings.ace_options.wrap=true
+      global_settings.ace_options.indentedSoftWrap=false
       break
     case "wrap-indented":
-      global_ace_options.wrap=true
-      global_ace_options.indentedSoftWrap=true
+      global_settings.ace_options.wrap=true
+      global_settings.ace_options.indentedSoftWrap=true
       break
     default:  
-      global_ace_options.wrap="off"
+      global_settings.ace_options.wrap="off"
   }
-  //console.log(global_ace_options)
-  apply_editor_options(global_ace_options)
+  //console.log(global_settings.ace_options)
+  apply_editor_options(global_settings.ace_options)
   const code = `function apply_ace_system_settings(){
-    global_ace_options=${JSON.stringify(global_ace_options,null,4)}
+    global_settings.ace_options=${JSON.stringify(global_settings.ace_options,null,4)}
 
-    apply_editor_options(global_ace_options)
+    apply_editor_options(global_settings.ace_options)
   }
   `
   save_module_to_workbook(code,"ACE System")
@@ -221,9 +224,9 @@ function add_code_module(name,code){
   // a module built with whatever code is in default_code
   if(!code){// no code is pased in, determine which default code to import
     if(code_panels.length === 0){
-      code=default_code()
+      code = default_code()
     }else{  
-      code=default_code("panel_" + name.toLowerCase().split(" ").join("_") + "_module")
+      code = default_code("panel_" + name.toLowerCase().split(" ").join("_") + "_module")
     }
   }
   if(!name){name="code"}
@@ -319,36 +322,40 @@ function set_style(style_name){
 }
 
 
-
-
-
-
-function build_panel(id){
-  const div=document.createElement("div");
-  div.id=id
-  div.style.display="none"
-  if(!panels.includes){
-    panels.push(div)
-  }
-  
-document.body.appendChild(div)
-
+function panel_close_button(panel_name){
+  return '<div id="close_' + panel_name + '" onclick="close_canvas(\'' + panel_name + '\')" class="top-corner" style="padding:5px 5px 0 5px;margin:5px 15px 0 0; cursor:pointer"><i class="far fa-window-close fa-2x"></i></i></div>'
 }
 
-function show_automations(){
-  const panel_name="panel_listings"
- //console.log(1)
-  if(!panels.includes){
-    build_panel(panel_name)
+
+
+function build_panel(panel_name, show_close_button){
+  const div=document.createElement("div");
+  div.id=panel_name
+  div.style.display="none"
+  div.innerHTML=panel_close_button(panel_name)
+  if(!panels.includes(panel_name)){
+    panels.push(panel_name)
   }
-  
+  document.body.appendChild(div)
+  if (show_close_button===undefined){
+    show_close_button=true
+  }
+  if(!show_close_button){
+    hide_element("close_" + panel_name)
+  }
+}
+
+
+
+function show_automations(show_close_button){
+  const panel_name="panel_listings"
 
   // get the list of functions
   //###################################################### need to iterate over all modules
-  const html=['<div onclick="close_canvas(\'' + panel_name + '\')" class="top-corner" style="padding:5px 5px 0 5px;margin:5px 15px 0 0; cursor:pointer"><i class="far fa-window-close fa-2x"></i></i></div><h2 style="margin:0 0 0 1rem">Active Automations</h2><ol>']
+  const html=['<h2 style="margin:0 0 0 1rem">Active Automations</h2><ol>']
   //console.log("code panels", code_panels)
   for(const code_panel of code_panels){
-    const code=tag(code_panel+"_div").firstChild.innerText
+    const code = tag(code_panel+"_div").firstChild.innerText
     const functions=get_function_names(code).function
     
     for(const func of functions){
@@ -407,7 +414,7 @@ function show_panel(panel_name){
     }
   }
 
-  if(panels.slice(0, 2).includes(panel_name) || code_panels.includes(panel_name)){
+  if(panels.slice(0, 3).includes(panel_name) || code_panels.includes(panel_name)){
     set_style()
   }
   
@@ -474,7 +481,7 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
   // settings are things gove is storing with the module
   // options are the options from the ace editor
   
-  let options = global_ace_options
+  let options = global_settings.ace_options
 
 
   // not currently handling options at the editor level, so this block is diabled
@@ -492,7 +499,7 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
   code_panels.push(panel_name)
   panel_labels.push(panel_name_to_panel_label(panel_name))
   panels.push(panel_name)
-  build_panel(panel_name)
+  build_panel(panel_name, false)
   tag(panel_name).dataset.module_name = module_name
   tag(panel_name).dataset.module_xmlid = module_xmlid
   
@@ -571,7 +578,7 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
 
     editor.commands.addCommand({  // toggle word wrap
       name: "wrap",
-      bindKey: {win: "Ctrl-shift-w", mac: "Command-shift-w"},
+      bindKey: {win: "Alt-z", mac: "Alt-z"},
       exec: function(editor) {
         for(const panel of code_panels){
           if(tag(panel).style.display==="block"){
@@ -584,35 +591,6 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
       }
     })
 
-    editor.commands.addCommand({  // toggle Theme
-      name: "theme",
-      bindKey: {win: "Ctrl-shift-t", mac: "Command-shift-t"},
-      exec: function(editor) {
-        for(const panel of code_panels){
-          if(tag(panel).style.display==="block"){
-            // we found the one that is visible
-            toggle_theme(panel)
-            break//exit the loop
-          }
-        }
-        
-      }
-    })
-
-    editor.commands.addCommand({  // can't make ctrl+shift work.  I expect that the addin environment is trappping that keystroke
-      name: "save",
-      bindKey: {win: "Ctrl-shift+s", mac: "Command-shift-s"},
-      exec: function(editor) {
-        for(const panel of code_panels){
-          if(tag(panel).style.display==="block"){
-            // we found the one that is visible
-            update_editor_script(panel)
-            break//exit the loop
-          }
-        }
-        
-      }
-    })
     editor.commands.addCommand({  // could do ctrl+r but want to be parallel with save
       name: "run",
       bindKey: {win: "Ctrl-enter", mac: "Command-enter"},
@@ -685,9 +663,21 @@ function code_runner(script_name,panel_name){
   }
 }
 
+function init_output(){
+  const panel_name="panel_output"
+  build_panel(panel_name, false)
+  const panel=tag(panel_name)
+ //console.log("initializing examples")
+  panel.appendChild(get_panel_selector(panel_name))
+  print('This panel shows the results of your calls to the "print" function.  Use "print(data)" to append text to the most recently printed block.', "About the Output Panel")
+  print('\nUse "print(data, heading)" to start a new block.')
+  
+}
+
+
 function init_examples(){
   const panel_name="panel_examples"
-  build_panel(panel_name)
+  build_panel(panel_name, false)
   const panel=tag(panel_name)
  //console.log("initializing examples")
   panel.appendChild(get_panel_selector(panel_name))
@@ -698,12 +688,13 @@ function init_examples(){
 
 //console.log("about to fetch")
 
-fetch("https://thegove.github.io/VBA-samples/excel-js_snippets.yaml?" + new Date())
-.then((response) => response.text())
-.then((yaml_data) => {
+fetch(global_settings.system.examples_url.replace("gist.github.com", "gist.githubusercontent.com") + "/raw/?" + new Date())
+.then((response) => response.json())
+.then((data) => {
   const html = [];
   let i = 0;
-  const data = jsyaml.load(yaml_data);
+  //const data = jsyaml.load(yaml_data);
+  console.log("Json data", data)
   for (const group of data) {
     html.push("<h2>" + group.name + "</h2>");
     for (const gist of group.snips) {
@@ -739,11 +730,13 @@ function show_example(id, url) {
     fetch(url.replace("gist.github.com", "gist.githubusercontent.com") + "/raw/?" + new Date())
       .then((response) => response.text())
       .then((data) => {
-        const gist = jsyaml.load(data);
+        console.log(data)
+        //const gist = jsyaml.load(data);
         //console.log(gist)
 
         let div = document.createElement("div");
-        div.innerHTML = gist.template.content;
+        div.id="example" + id + "_html"
+        //div.innerHTML = gist.template.content;
         div.style.marginBottom = "1rem";
         elem.appendChild(div);
 
@@ -756,7 +749,7 @@ function show_example(id, url) {
 
         div = document.createElement("div");
         div.id = "editor" + id;
-        div.innerHTML = gist.script.content;
+        div.innerHTML = data.toHtmlEntities()
 
         box.appendChild(div);
         elem.appendChild(box);
@@ -789,13 +782,17 @@ function show_example(id, url) {
         div = document.createElement("div");
         div.id = "script" + id;
         const script = document.createElement("script");
-        script.innerHTML = gist.script.content;
+        script.innerHTML = show_example_html_script(id) + data;
         div.appendChild(script);
         elem.appendChild(div);
+        setup() // setup must be defined in the example
+
+
+
       })
       .catch((error) => {
-       //console.log(error);
-      });
+       ;console.log(error);
+      })
   } else {
     if (elem.style.display === "block") {
       elem.style.display = "none";
@@ -803,6 +800,10 @@ function show_example(id, url) {
       elem.style.display = "block";
     }
   }
+}
+
+function show_example_html_script(id){
+  return 'function show_html(html){tag("example'+id+'_html").innerHTML=html}\n'
 }
 
 function copy(text, out) {
@@ -822,12 +823,14 @@ function update_script(id) {
   // read the script for an ace editor and write it to the DOM
   // this is the one used by the examples page
   //console.log("script" + id);
+  
   script_div = document.getElementById("script" + id);
   script_div.innerHTML = "";
   const editor = ace.edit("editor" + id);
   const script = document.createElement("script");
-  script.innerHTML = editor.getValue();
+  script.innerHTML = show_example_html_script(id) + editor.getValue();
   script_div.appendChild(script);
+  //setup()// this must be deifned in the script example
 }
 
 
@@ -836,6 +839,12 @@ function update_editor_script(panel_name) {
   // also saves the module to the custom properties
   //console.log("at update_editor_script", panel_name)
   // set the size of the editor in case there was a prior zoom
+
+  // show_html is defined differntly for modules than for examples
+  // we need to be sure it is defined correctly for modules
+
+  show_html_script='function show_html(html){open_canvas("html", html)}'
+
   tag(panel_name + "_editor-page").style.height = editor_height()
 
   script_div = document.getElementById(panel_name + "_div");
@@ -845,10 +854,16 @@ function update_editor_script(panel_name) {
   const code = ace.edit(panel_name + "-content").getValue();
   //console.log(code)
   const script = document.createElement("script");
-  script.innerHTML = code
-  script_div.appendChild(script);
-  load_function_names_select(code, panel_name)
-  write_module_to_workbook(code, panel_name)
+  script.innerHTML = show_html_script + code
+  try{
+    script_div.appendChild(script);
+    load_function_names_select(code, panel_name)
+  }catch(e){
+    console.error("There is a problem with your script",e)
+    alert("module error" + JSON.stringify(e) )
+  }finally{
+    write_module_to_workbook(code, panel_name)
+  }  
   
 }
 function write_module_to_workbook(code, panel_name){
@@ -1077,14 +1092,15 @@ function hide_element(tag_id){
   //console.log("tag_id",tag_id)
   //console.log("tag(tag_id)",tag(tag_id))
   //console.log("tag(tag_id).className",tag(tag_id).className)
-  if(tag(tag_id).className){
-    if(!tag(tag_id).className.includes("hidden")){
-      tag(tag_id).className=(tag(tag_id).className + " hidden").trim()
+  if(tag(tag_id)){
+    if(tag(tag_id).className){
+      if(!tag(tag_id).className.includes("hidden")){
+        tag(tag_id).className=(tag(tag_id).className + " hidden").trim()
+      }
+    }else{
+      tag(tag_id).className="hidden"
     }
-  }else{
-    tag(tag_id).className="hidden"
   }
-  
 }
 
 function toggle_element(tag_id){
@@ -1101,7 +1117,7 @@ function editor_height(){
 }
 
 function default_code(panel_name){
-  let code=`async function write_timestamp(excel){
+  let code = `async function write_timestamp(excel){
     /*ace.listing:{"name":"Timestamp","description":"This sample function records the current time in the selected cells"}*/
   excel.workbook.getSelectedRange().values = new Date();
   await excel.sync();

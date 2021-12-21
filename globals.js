@@ -1,4 +1,8 @@
-let global_ace_options = {
+let global_settings={
+  system:{
+    examples_url:"https://gist.github.com/theGove/989fc9443c232391ecfa83089e24e791"
+  },
+  ace_options:{
     selectionStyle:"line",
     highlightActiveLine:true,
     highlightSelectedWord:true,
@@ -45,13 +49,14 @@ let global_ace_options = {
     mode:"ace/mode/javascript",
     enableMultiselect:true,
     enableBlockSelect:true
- }
+  }
+}
 let ace_system_module_id=null
 let hide_ace_system_module = true
 let code_module_ids=[] // the set of code modules read from the workbook's custom xml properties
 let css_suffix="" // set by the user with set_css()
 const panels=['panel_introduction','panel_examples']
-const panel_labels=["Introduction", "Examples"]
+const panel_labels=["Introduction", "Examples", "Output"]
 const code_panels=[]
 const panel_stack=['panel_introduction']
 

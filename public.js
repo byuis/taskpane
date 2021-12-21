@@ -52,6 +52,11 @@ function open_editor(){
     show_panel(code_panels[0])
 }
 
+function open_output(){
+    show_panel("panel_output")
+}
+
+
 function open_automations(){
     show_automations()
 }
@@ -60,30 +65,86 @@ function reset(){
     show_panel("panel_introduction")
 }
 
-function open_canvas(panel, proc_or_html, style_name){
+function show_html(html){
+    //A simple function that is mapped differntly for examples than for modules
+    //this is the module mapping
+    open_canvas("html", html)
+}
+
+function open_canvas(panel_name, html, style_name){
     if(style_name){
         set_style(style_name)
     }
 
-    if(!tag(panel)){
-        build_panel(panel)
+    if(!tag(panel_name)){
+        build_panel(panel_name)
     }
 
-    if(!panels.includes(panel)){
-        panels.push(panel)
+    if(!panels.includes(panel_name)){
+        panels.push(panel_name)
     }
 
-    show_panel(panel)
+    show_panel(panel_name)
 
-    if(typeof proc_or_html === "function"){
-        proc_or_html()
-    }else{
-        if(proc_or_html){
-            tag(panel).innerHTML=proc_or_html
-        }
+    if(html){
+        tag(panel_name).innerHTML=panel_close_button(panel_name) + html
     }
 }
+function print(data, heading){
+    //if(!header && )
+    if(!tag("panel_output").lastChild.lastChild.firstChild.tagName && !heading){
+        //no output here, need a headdng
+        heading=""
+    }
+    if(heading!==undefined){
+        // there is a header, so make a new block
+        console.log("at data")
+        const div = document.createElement("div")
+        div.className="ace-output"
+        const header = document.createElement("div")
+        header.className="ace-output-header"  
+        const d = new Date()
+        let ampm=" am"
+        let hours=d.getHours()
+        if(hours >11){
+            ampm="pm"
+            if(hours>12){
+                hours=hours-12
+            }
+        }
+        header.innerHTML = '<span class="ace-output-time">' + hours + ":" + ("0"+d.getMinutes()).slice(-2) + ":" + ("0"+d.getSeconds()).slice(-2) + ampm + "</span> " + heading + '<div class="ace-output-close"><i class="fas fa-times" style="color:white;margin-right:.3rem;cursor:pointer" onclick="this.parentNode.parentNode.parentNode.remove()"></div>'
+        const body = document.createElement("div")
+        body.className="ace-output-body"  
+        body.innerHTML = '<div style="margin:0;font-family: monospace;">' + data.replaceAll("\n","<br />")  + "<br />"+ "</div>"
+        div.appendChild(header)
+        div.appendChild(body)
+        tag("panel_output").appendChild(div)
+    }else{
+        // no header provided, append to most recently added
+        tag("panel_output").lastChild.lastChild.firstChild.innerHTML += data.replaceAll("\n","<br />") + "<br />"
+    }
+
   
+}
+  
+function alert(data, heading){
+    if(tag("ace-alert")){tag("ace-alert").remove()}
+    if(!heading){heading="System Message"}
+    const div = document.createElement("div")
+    div.className="ace-alert"
+    div.id='ace-alert'
+    const header = document.createElement("div")
+    header.className="ace-alert-header"  
+    header.innerHTML = heading + '<div class="ace-alert-close"><i class="fas fa-times" style="color:white;margin-right:.3rem;cursor:pointer" onclick="this.parentNode.parentNode.parentNode.remove()"></div>'
+    const body = document.createElement("div")
+    body.className="ace-alert-body"  
+    body.innerHTML = data
+    div.appendChild(header)
+    div.appendChild(body)
+    document.body.appendChild(div)
+
+}
+
 function show_examples(){
     const panel_name="panel_examples"
     set_style()
