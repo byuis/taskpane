@@ -108,7 +108,12 @@ function configure_settings(){
 
 
 function save_settings(){
-  global_settings.system.examples_url=tag("examples-url").value
+  if(global_settings.system.examples_url!==tag("examples-url").value){
+    global_settings.system.examples_url=tag("examples-url").value
+    // different examples specified.  Need to rebuild
+    rebuild_examples()
+  }
+  
   global_settings.ace_options.theme="ace/theme/" + tag("ace-theme").value
   global_settings.ace_options.fontSize=tag("ace-font-size").value + "pt"
   global_settings.ace_options.showGutter=tag("ace-line-numbers").checked
@@ -394,7 +399,7 @@ function show_automations(show_close_button){
   }
 
   if(html.length===1){
-    //Did not find any properly configured fucntions
+    //Did not find any properly configured functions
     html.push("There are currently no active automations in this workbook.")
   }else{
     html.push("</ul>")  
@@ -674,10 +679,21 @@ function init_output(){
   
 }
 
+function rebuild_examples(){
+  tag("panel_examples").innerHTML=""
+  fill_examples()
+}
+
+
 
 function init_examples(){
+  build_panel("panel_examples", false)
+  fill_examples()
+}
+
+
+function fill_examples(){
   const panel_name="panel_examples"
-  build_panel(panel_name, false)
   const panel=tag(panel_name)
  //console.log("initializing examples")
   panel.appendChild(get_panel_selector(panel_name))
