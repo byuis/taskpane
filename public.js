@@ -52,13 +52,17 @@ function open_editor(){
     show_panel(code_panels[0])
 }
 
+function open_examples(){
+    show_panel("panel_examples")
+}
+
 function open_output(){
     show_panel("panel_output")
 }
 
 
-function open_automations(){
-    show_automations()
+function open_automations(show_close_button){
+    show_automations(show_close_button)
 }
 
 function reset(){
@@ -71,7 +75,7 @@ function show_html(html){
     open_canvas("html", html)
 }
 
-function open_canvas(panel_name, html, style_name){
+function open_canvas(panel_name, html, show_panel_close_button, style_name){
     if(style_name){
         set_style(style_name)
     }
@@ -87,7 +91,12 @@ function open_canvas(panel_name, html, style_name){
     show_panel(panel_name)
 
     if(html){
-        tag(panel_name).innerHTML=panel_close_button(panel_name) + html
+        if(show_panel_close_button || show_panel_close_button===undefined){
+            tag(panel_name).innerHTML=panel_close_button(panel_name) + html
+        }else{
+            tag(panel_name).innerHTML= html
+        }
+        
     }
 }
 function print(data, heading){

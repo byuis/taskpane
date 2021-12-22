@@ -53,12 +53,7 @@ function start_me_up(){
       //console.log("options-parsed", JSON.parse(options))
       if(module_name==="ACE System" && hide_ace_system_module){
         // just need to load the code  
-        const script = document.createElement("script");
-        script.innerHTML = module_code
-        script.id="ace_system_script"
-        document.body.appendChild(script)
-        ace_system_module_id=code_module_id
-        tag("ace_system_script").remove()// once the script has been loaded, there is no reason to leave it in the html
+        incorporate_code(module_code)
       }else{
         add_code_editor(module_name, module_code,code_module_id, JSON.parse(settings), JSON.parse(options))        
       }
@@ -360,42 +355,51 @@ function show_automations(show_close_button){
   const html=['<h2 style="margin:0 0 0 1rem">Active Automations</h2><ol>']
   //console.log("code panels", code_panels)
   for(const code_panel of code_panels){
-    const code = tag(code_panel+"_div").firstChild.innerText
-    const functions=get_function_names(code).function
-    
-    for(const func of functions){
-      //console.log(func)
-      let func_value = null
-      if(code.includes("async function " + func + "(excel)")){
-        //this is an async call to a funtion that interact with the workbook
-        func_value=func + "(excel)"
-        //console.log("adding",func)
-      }else if(code.includes("function " + func + "()")){
-        // this is a regular JS function with no params
-        func_value=func+"()"
-      }
-      const function_text = window[func]+''
-      //console.log(func_value, function_text.includes("ace.listing:"), function_text)
-      if(func_value && function_text.includes("ace.listing:")){ // this is a function we can run directly and it as the comment
-          //console.log("found a comment", func)
-        const comment = function_text.split("ace.listing:")[1].split("*/")[0]
-      //console.log("comment", comment)
-        try{
-          const comment_json=JSON.parse(comment)
-          let stmt
-          if(func_value.includes("(excel)")){
-            stmt="Excel.run(" + func_value.split("(")[0] + ")"
-          }else{
-            stmt=func_value
-          }
+    const editor = ace.edit(code_panel + "-content");
+    const code = editor.getValue();
+    const parsed_code=parse_code(code)
 
-          html.push('<li onclick="'+stmt+'" style="cursor:pointer"><b>'+comment_json.name+'</b>: '+comment_json.description+'</li>')
-          //console.log("html",html)
-        }catch(e){
-          ;console.log("ace.listing was not valid JSON", comment)        
+
+   //console.log(parsed_code)
+    
+
+    for(const element of parsed_code.body){
+      let call_stmt = null
+      if(element.type==="FunctionDeclaration"){
+        if(element.id && element.id.name){
+          // this is a named function
+          if(element.params.length===0){
+            //there are no params. it is callable
+            call_stmt=element.id.name + "()"
+          } else if(element.params.length===1){
+            // there is one param.  
+            if(element.async){
+              if(("excel ctx context").includes(element.params[0].name)){
+                // this is an async function with a single parameter named excel, ctx or context.  Run by passing context
+                call_stmt = "Excel.run(" + element.id.name + ")"
+              }
+            }
+          }  
+          if(call_stmt){ // this is a function we can run directly
+            // check for comment
+            const function_text = window[ element.id.name]+''
+           //console.log(function_text)
+
+
+            if(function_text.includes("ace.listing:")){ // this is a function we can run directly and it as the comment
+              //console.log("found a comment", func)
+              const comment = function_text.split("ace.listing:")[1].split("*/")[0]
+              try{
+                const comment_json=JSON.parse(comment)
+                html.push('<li onclick="'+call_stmt+'" style="cursor:pointer"><b>'+comment_json.name+'</b>: '+comment_json.description+'</li>')
+              }catch(e){
+                ;console.log("ace.listing was not valid JSON", comment)        
+              }
+            }//for function on code page
+          } 
         }
-      }//for function on code page
-    }//for code page 
+      }
+    } 
   }
 
   if(html.length===1){
@@ -404,13 +408,17 @@ function show_automations(show_close_button){
   }else{
     html.push("</ul>")  
   }
-  open_canvas("panel_listings",html.join(""))
+  open_canvas("panel_listings",html.join(""), show_close_button)
 }
 
 function show_panel(panel_name){
 
   if(code_panels.includes(panel_name)){
     // set the size in case it is off
+    if(tag(panel_name + "_function-names").length===0){
+      // there are no function to run
+      hide_element(panel_name + "_function-names")
+    }
     tag(panel_name + "_editor-page").style.height = editor_height()
     try{
       ace.edit(panel_name + "-content").focus()
@@ -567,7 +575,7 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
 
   scriptPromise.then(() => {
     const editor = ace.edit(panel_name + "-content");
-    editor.getSession().setUseWorker(false);
+    
     editor.on("blur", function () {
       window.event.target.parentElement.dataset.edited=true
     });
@@ -630,14 +638,14 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
 
   editor_container.style.display = "block";
 
-  div = document.createElement("div");
-  div.id = panel_name + "_div";      
-  const script = document.createElement("script");
-  script.innerHTML = code;
-  div.appendChild(script);
-  editor_container.appendChild(div);
+  const parsed_code=parse_code(code)
+  if(!parsed_code.error){
+    // only incorporate the code if it is free of syntax errors
+    incorporate_code(code)  
+  }
 
-
+  
+  
   tag(panel_name).appendChild(editor_container)
 
   load_function_names_select(code, panel_name)
@@ -659,8 +667,13 @@ function add_code_editor(module_name, code, module_xmlid, settings, options_in){
 function code_runner(script_name,panel_name){
   //console.log(script_name,panel_name)
   if (tag(panel_name + "-content").dataset.edited==="true"){
-    update_editor_script(panel_name)
+    if(!update_editor_script(panel_name)){
+      // update_editor_script returns false if there is a 
+      // syntax error.  Don't run the old code
+      return
+    }
   }
+  
   if(script_name.includes("(excel)")){
     setTimeout("Excel.run(" + script_name.split("(")[0] + ")", 0) //run the function
   }else{
@@ -710,20 +723,20 @@ fetch(global_settings.system.examples_url.replace("gist.github.com", "gist.githu
   const html = [];
   let i = 0;
   //const data = jsyaml.load(yaml_data);
-  console.log("Json data", data)
+ //console.log("Json data", data)
   for (const group of data) {
     html.push("<h2>" + group.name + "</h2>");
     for (const gist of group.snips) {
       html.push(
         '<p><a title="Copy Gist URL for import" onclick="copy(\'' +
         gist.URL +
-        '\')"><img src="https://thegove.github.io/VBA-samples/link.png" width="18px" class="link"></a><a class="link" title="Show Code" onclick="show_example(' +
+        '\')"><i class="fas fa-link" style="cursor:pointer"></i></a> <a class="link" title="Show Code" onclick="show_example(' +
         ++i +
         ",'" +
         gist.URL +
-        "')\">" +
+        "')\"><b>" +
         gist.name +
-        "</a> " +
+        ":</b></a> " +
         gist.description +
         '</p><div id="page' +
         i +
@@ -746,7 +759,7 @@ function show_example(id, url) {
     fetch(url.replace("gist.github.com", "gist.githubusercontent.com") + "/raw/?" + new Date())
       .then((response) => response.text())
       .then((data) => {
-        console.log(data)
+       //console.log(data)
         //const gist = jsyaml.load(data);
         //console.log(gist)
 
@@ -770,8 +783,8 @@ function show_example(id, url) {
         box.appendChild(div);
         elem.appendChild(box);
 
-        //        elem.innerHTML = '<pre id="pre' + id + '">' + gist.script.content.split("<").join("&lt;") + '</pre>'
-
+        
+        // setting up the editor in the example space
         const scriptPromise = new Promise((resolve, reject) => {
           const script = document.createElement("script");
           document.body.appendChild(script);
@@ -791,18 +804,26 @@ function show_example(id, url) {
           editor.setOptions({fontSize: "14pt"});
           editor.getSession().setUseWorker(false);
           editor.session.setMode("ace/mode/javascript");
-        });
+          editor.commands.addCommand({  // toggle word wrap
+            name: "wrap",
+            bindKey: {win: "Alt-z", mac: "Alt-z"},
+            exec: function(editor) {            
+              if(editor.getOptions().wrap==="off"){
+                editor.setOptions({wrap: true})
+                globalThis=true
+              }else{
+                editor.setOptions({wrap: "off"})
+                global_wrap="off"
+              }              
+            }
+          })
+        })
 
         elem.style.display = "block";
+        incorporate_code(show_example_html_script(id))
 
-        div = document.createElement("div");
-        div.id = "script" + id;
-        const script = document.createElement("script");
-        script.innerHTML = show_example_html_script(id) + data;
-        div.appendChild(script);
-        elem.appendChild(div);
+        incorporate_code(data)
         setup() // setup must be defined in the example
-
 
 
       })
@@ -825,30 +846,45 @@ function show_example_html_script(id){
 function copy(text, out) {
   navigator.clipboard
     .writeText(text)
-    .then(() => {
-      if (out) {
-        status('choose "Import" from the Script Lab code editor main menu', out);
-      }
-    })
-    .catch(() => {
-      //console.log("Failed to copy text.");
-    });
+    // .then(() => {
+    //   if (out) {
+    //     status('choose "Import" from the Script Lab code editor main menu', out);
+    //   }
+    // })
+    // .catch(() => {
+    //   //console.log("Failed to copy text.");
+    // });
 }
 
 function update_script(id) {
   // read the script for an ace editor and write it to the DOM
   // this is the one used by the examples page
   //console.log("script" + id);
+  const editor=ace.edit("editor" + id)
+  const code = editor.getValue()
+  const parsed_code=parse_code(code)
+
+  if(parsed_code.error){
+    alert(parsed_code.error, "Syntax Error")
+    editor.moveCursorTo(parsed_code.error.split("(")[1].split(":")[0]-1,parsed_code.error.split("(")[1].split(":")[1].split(")")[0])
+    editor.focus()
+    return false
+  }
+
+
+  incorporate_code(show_example_html_script(id))
+  incorporate_code(code)
   
-  script_div = document.getElementById("script" + id);
-  script_div.innerHTML = "";
-  const editor = ace.edit("editor" + id);
-  const script = document.createElement("script");
-  script.innerHTML = show_example_html_script(id) + editor.getValue();
-  script_div.appendChild(script);
-  //setup()// this must be deifned in the script example
+  return true
 }
 
+function parse_code(code){
+  try{
+    return acorn.parse(code, { "ecmaVersion": 8 }  );
+  }catch(e){
+    return {error:e.message}
+  }
+}
 
 function update_editor_script(panel_name) {
   // read the script for an ace editor and write it to the DOM
@@ -856,32 +892,53 @@ function update_editor_script(panel_name) {
   //console.log("at update_editor_script", panel_name)
   // set the size of the editor in case there was a prior zoom
 
-  // show_html is defined differntly for modules than for examples
-  // we need to be sure it is defined correctly for modules
-
-  show_html_script='function show_html(html){open_canvas("html", html)}'
-
+  
+  // update the height of the editor in case it has gotten out of synch
   tag(panel_name + "_editor-page").style.height = editor_height()
 
-  script_div = document.getElementById(panel_name + "_div");
-  script_div.innerHTML = "";
 
-  // update the script_div for one code panel
-  const code = ace.edit(panel_name + "-content").getValue();
-  //console.log(code)
-  const script = document.createElement("script");
-  script.innerHTML = show_html_script + code
-  try{
-    script_div.appendChild(script);
-    load_function_names_select(code, panel_name)
-  }catch(e){
-    console.error("There is a problem with your script",e)
-    alert("module error" + JSON.stringify(e) )
-  }finally{
-    write_module_to_workbook(code, panel_name)
-  }  
+  // show_html is defined differntly for modules than for examples
+  // we need to be sure it is defined correctly for modules, so we set it here
+  incorporate_code('function show_html(html){open_canvas("html", html)}')
+
+
+  // get the code
+  const editor=ace.edit(panel_name + "-content")
+  const code = editor.getValue();
+
+  // save the script to the workbook
+  write_module_to_workbook(code, panel_name)
+
+  //Check for syntax errors
+  const parsed_code=parse_code(code)
+
+  if(parsed_code.error){
+    alert(parsed_code.error, "Syntax Error")
+    editor.moveCursorTo(parsed_code.error.split("(")[1].split(":")[0]-1,parsed_code.error.split("(")[1].split(":")[1].split(")")[0])
+    editor.focus()
+
+    return false
+  }
   
+  // load the user's code into the browser
+  incorporate_code(code)
+
+  // put the function names in the function dropdown
+  load_function_names_select(parsed_code, panel_name)
+  
+  return true
 }
+
+function incorporate_code(code){
+  // It turns out that the script block does not need to persist in the HTML
+  // once the script block is loaded, the JS is parsed and not again referenced.
+  // So, we create a script block, append it to the document body, then remove.
+  const script = document.createElement("script");
+  script.innerHTML = code
+  document.body.appendChild(script);
+  document.body.lastChild.remove()
+}
+
 function write_module_to_workbook(code, panel_name){
   let options = {theme:global_theme,wrap:global_wrap,fontSize:"14pt"}
   const settings = {
@@ -956,6 +1013,18 @@ function save_module_to_workbook(code, module_name, settings, xmlid, options){
 
 
 function load_function_names_select(code,panel_name){// reads the function names from the code and puts them in the function name select
+
+  // if a string is passed in, parse it.  otherwise, assume it is already parsed
+  if(typeof code === "string"){
+    var parsed_code = parse_code(code)
+  }else{
+    var parsed_code = code
+  }
+  
+  if(parsed_code.error){
+    return
+  }
+
   const selectElement=tag(panel_name + "_function-names")
   const selected_script = selectElement.value
   
@@ -964,48 +1033,40 @@ function load_function_names_select(code,panel_name){// reads the function names
      selectElement.remove(0);
   }
 
-  for(const func of get_function_names(code).function){
-    let func_value = null
-    if(code.includes("async function " + func + "(excel)")){
-      //this is an async call to a funtion that interact with the workbook
-      func_value=func + "(excel)"
-    }else if(code.includes("function " + func + "()")){
-      // this is a regular JS function with no params
-      func_value=func+"()"
+  for(const element of parsed_code.body){
+    let option_value = null
+    if(element.type==="FunctionDeclaration"){
+      if(element.id && element.id.name){
+        // this is a named function
+        if(element.params.length===0){
+          //there are no params. it is callable
+          option_value=element.id.name + "()"
+        } else if(element.params.length===1){
+          // there is one param.  
+          if(element.async){
+            if(("excel ctx context").includes(element.params[0].name)){
+              // this is an async function with a single parameter named excel, ctx or context.  Run by passing context
+              option_value = element.id.name + "(excel)"
+            }
+          }
+        }  
+        if(option_value){ // this is a function we can run directly
+          const option = document.createElement("option")
+          if(option_value===selected_script){option.selected='selected'}
+          option.text = element.id.name
+          option.value = option_value
+          selectElement.add(option)    
+        } 
+      }
     }
-
-    if(func_value){ // this is a function we can run directly
-      const option = document.createElement("option")
-      if(func_value===selected_script){option.selected='selected'}
-      option.text = func
-      option.value = func_value
-      selectElement.add(option)    
-    } 
-
+  } 
+  if(selectElement.length===0){
+    hide_element(selectElement)
+  }else{
+    show_element(selectElement)
   }
 }
 
-function get_function_names(text) {  // gets the names of functions from a block of JS
-  text = text.replace(/\/\/.*?\r?\n/g, "")                                 // first, remove line comments
-             .replace(/\r?\n/g, " ")                                       // then remove new lines (replace them with spaces to not break the structure)
-             .replace(/\/\*.*?\*\//g, "");                                 // then remove block comments
-             
-  // PART 1: Match functions declared using: var * = function 
-  var varFuncs      = (text.match(/[$A-Z_][0-9A-Z_$]*\s*=\s*function[( ]/gi) || []) // match any valid function name that comes before \s*=\s*function
-                           .map(function(tex) {                            // then extract only the function names from the matches
-                             return tex.match(/^[$A-Z_][0-9A-Z_$]*/i)[0];
-                           });
-
-  // PART 2: Match functions declared using: function * 
-  var functionFuncs = (text.match(/function\s+[^(]+/g) || [])              // match anything that comes after function and before (
-                           .map(function(tex) {                            // then extarct only the names from the matches
-                             return tex.match(/[$A-Z_][0-9A-Z_$]*$/i)[0];
-                           });
-  return {
-    var: varFuncs,
-    function: functionFuncs
-  };
-} 
 
 function get_panel_selector(panel){
   const panel_label=panel_name_to_panel_label(panel)
@@ -1100,7 +1161,12 @@ String.fromHtmlEntities = function(string) {
 
 function show_element(tag_id){
   // removes the hidden class from a tag's css
-  tag(tag_id).className=tag(tag_id).className.replaceAll("hidden","")
+  if (typeof tag_id==="string"){
+    var the_tag=tag(tag_id)
+  }else{  
+    the_tag=tag_id
+  }
+  the_tag.className=the_tag.className.replaceAll("hidden","")
 }
 
 function hide_element(tag_id){
@@ -1108,23 +1174,35 @@ function hide_element(tag_id){
   //console.log("tag_id",tag_id)
   //console.log("tag(tag_id)",tag(tag_id))
   //console.log("tag(tag_id).className",tag(tag_id).className)
-  if(tag(tag_id)){
-    if(tag(tag_id).className){
-      if(!tag(tag_id).className.includes("hidden")){
-        tag(tag_id).className=(tag(tag_id).className + " hidden").trim()
+  if (typeof tag_id==="string"){
+    var the_tag=tag(tag_id)
+  }else{  
+    the_tag=tag_id
+  }
+  if(the_tag){
+    if(the_tag.className){
+      if(!the_tag.className.includes("hidden")){
+        the_tag.className=(the_tag.className + " hidden").trim()
       }
     }else{
-      tag(tag_id).className="hidden"
+      the_tag.className="hidden"
     }
   }
 }
 
 function toggle_element(tag_id){
   // adds the hidden class from a tag's css
-  if(tag(tag_id).className.includes("hidden")){
-    show_element(tag_id)
+  
+  if (typeof tag_id==="string"){
+    var the_tag=tag(tag_id)
+  }else{  
+    the_tag=tag_id
+  }
+
+  if(the_tag.className.includes("hidden")){
+    show_element(the_tag)
   }else{
-    hide_element(tag_id)
+    hide_element(the_tag)
   }
 }
 
@@ -1154,3 +1232,7 @@ function auto_exec(){
   }
   return code
 }
+
+
+
+

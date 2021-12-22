@@ -48,7 +48,9 @@ let global_settings={
     foldStyle:"markbegin",
     mode:"ace/mode/javascript",
     enableMultiselect:true,
-    enableBlockSelect:true
+    enableBlockSelect:true,
+    tabSize:2,
+    useSoftTabs:true
   }
 }
 let ace_system_module_id=null
